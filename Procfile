@@ -1,0 +1,1 @@
+web: stellar-go-api
