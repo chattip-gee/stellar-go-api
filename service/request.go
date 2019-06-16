@@ -9,10 +9,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const localhost = "8080"
+
 func getPort() string {
 	var port = os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = localhost
 		fmt.Println("No Port In Heroku " + port)
 	}
 	return ":" + port
