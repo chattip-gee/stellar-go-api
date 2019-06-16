@@ -49,7 +49,16 @@ func (d *Driver) Open(name string) (driver.Conn, error) {
 }
 
 func init() {
-	sql.Register("postgres", &Driver{})
+	//version before: sql.Register("postgres", &Driver{})
+	register := true
+	for _, d := range sql.Drivers() {
+		if d == "postgres" {
+			register = false
+		}
+	}
+	if register {
+		sql.Register("postgres", &Driver{})
+	}
 }
 
 type parameterStatus struct {
