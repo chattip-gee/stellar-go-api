@@ -21,8 +21,11 @@ func getPort() string {
 func HandleRequest() {
 	r := mux.NewRouter()
 	r.Schemes("https")
-	r.HandleFunc("/api/keypair", getKeyPair).Methods("GET")
-	r.HandleFunc("/api/friendbot/{addr}", getFriendbot).Methods("GET")
+
+	s := r.PathPrefix("/api").Subrouter()
+	s.HandleFunc("/keypair", getKeyPair).Methods("GET")
+	s.HandleFunc("/friendbot/{addr}", getFriendbot).Methods("GET")
+	s.HandleFunc("/account/details/{addr}", getAccountDetails).Methods("GET")
 
 	err := r.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		pathTemplate, err := route.GetPathTemplate()

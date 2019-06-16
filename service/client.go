@@ -8,6 +8,7 @@ import (
 	. "github.com/chattip-gee/stellar-go-api/model"
 	"github.com/gorilla/mux"
 
+	"github.com/stellar/go/clients/horizon"
 	"github.com/stellar/go/keypair"
 )
 
@@ -27,11 +28,8 @@ func getKeyPair(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := KeyPair{
-		Address: pair.Address(),
-		Seed:    pair.Seed()}
-
-	response := Response{
+	data := KeyPair{Address: pair.Address(), Seed: pair.Seed()}
+	response := KeyPairResponse{
 		Success:    true,
 		Message:    Success,
 		StatusCode: StatusOK,
@@ -67,4 +65,28 @@ func getFriendbot(w http.ResponseWriter, r *http.Request) {
 	JSONEncode(w, response)
 
 	defer friendBotResp.Body.Close()
+}
+
+func getAccountDetails(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	account, err := horizon.DefaultTestNetClient.LoadAccount(vars["addr"])
+	if err != nil {
+		log.Fatal(err)
+		errResponse := Response{
+			Success:    false,
+			Message:    err.Error(),
+			StatusCode: StatusBadRequest,
+		}
+		JSONEncode(w, errResponse)
+
+		return
+	}
+
+	response := BalanceResponse{
+		Success:    true,
+		Message:    Success,
+		StatusCode: StatusOK,
+		Data:       &account.Balances,
+	}
+	JSONEncode(w, response)
 }
