@@ -2,11 +2,29 @@
 	"ImportPath": "github.com/chattip-gee/stellar-go-api",
 	"GoVersion": "go1.12",
 	"GodepVersion": "v80",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
+		{
+			"ImportPath": "github.com/davecgh/go-spew/spew",
+			"Comment": "v1.1.1-1-gd8f796a",
+			"Rev": "d8f796af33cc11cb798c1aaeb27a4ebc5099927d"
+		},
+		{
+			"ImportPath": "github.com/go-errors/errors",
+			"Comment": "v1.0.1-2-gd98b870",
+			"Rev": "d98b870cc4e05f1545532a80e9909be8216095b6"
+		},
 		{
 			"ImportPath": "github.com/gorilla/mux",
 			"Comment": "v1.7.2",
 			"Rev": "ed099d42384823742bba0bf9a72b53b55c9e2e38"
+		},
+		{
+			"ImportPath": "github.com/konsorten/go-windows-terminal-sequences",
+			"Comment": "v1.0.2",
+			"Rev": "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
 		},
 		{
 			"ImportPath": "github.com/lib/pq",
@@ -24,13 +42,52 @@
 			"Rev": "2ff3cb3adc01768e0a552b3a02575a6df38a9bea"
 		},
 		{
+			"ImportPath": "github.com/manucorporat/sse",
+			"Rev": "ee05b128a739a0fb76c7ebd3ae4810c1de808d6d"
+		},
+		{
 			"ImportPath": "github.com/pkg/errors",
 			"Comment": "v0.8.1-24-g27936f6",
 			"Rev": "27936f6d90f9c8e1145f11ed52ffffbfdb9e0af7"
 		},
 		{
+			"ImportPath": "github.com/pmezard/go-difflib/difflib",
+			"Comment": "v1.0.0-4-g5d4384e",
+			"Rev": "5d4384ee4fb2527b0a1256a821ebfc92f91efefc"
+		},
+		{
+			"ImportPath": "github.com/segmentio/go-loggly",
+			"Comment": "v0.5.0-3-g7a70408",
+			"Rev": "7a70408c3650c37ba8e58a934f686d0c44cb9b58"
+		},
+		{
+			"ImportPath": "github.com/sirupsen/logrus",
+			"Comment": "v1.4.2-2-g2a22dbe",
+			"Rev": "2a22dbedbad1fd454910cd1f44f210ef90c28464"
+		},
+		{
+			"ImportPath": "github.com/sirupsen/logrus/hooks/test",
+			"Comment": "v1.4.2-2-g2a22dbe",
+			"Rev": "2a22dbedbad1fd454910cd1f44f210ef90c28464"
+		},
+		{
 			"ImportPath": "github.com/stellar/go-xdr/xdr3",
 			"Rev": "0bc96f33a18ef2f963e75431dbed042129eb421b"
+		},
+		{
+			"ImportPath": "github.com/stellar/go/amount",
+			"Comment": "horizon-v0.18.0-18-gb73b500",
+			"Rev": "b73b500bf3cba98c2b3c657ca37493f3a4fa51af"
+		},
+		{
+			"ImportPath": "github.com/stellar/go/build",
+			"Comment": "horizon-v0.18.0-18-gb73b500",
+			"Rev": "b73b500bf3cba98c2b3c657ca37493f3a4fa51af"
+		},
+		{
+			"ImportPath": "github.com/stellar/go/clients/horizon",
+			"Comment": "horizon-v0.18.0-18-gb73b500",
+			"Rev": "b73b500bf3cba98c2b3c657ca37493f3a4fa51af"
 		},
 		{
 			"ImportPath": "github.com/stellar/go/crc16",
@@ -53,7 +110,27 @@
 			"Rev": "b73b500bf3cba98c2b3c657ca37493f3a4fa51af"
 		},
 		{
+			"ImportPath": "github.com/stellar/go/price",
+			"Comment": "horizon-v0.18.0-18-gb73b500",
+			"Rev": "b73b500bf3cba98c2b3c657ca37493f3a4fa51af"
+		},
+		{
+			"ImportPath": "github.com/stellar/go/protocols/horizon",
+			"Comment": "horizon-v0.18.0-18-gb73b500",
+			"Rev": "b73b500bf3cba98c2b3c657ca37493f3a4fa51af"
+		},
+		{
+			"ImportPath": "github.com/stellar/go/protocols/horizon/base",
+			"Comment": "horizon-v0.18.0-18-gb73b500",
+			"Rev": "b73b500bf3cba98c2b3c657ca37493f3a4fa51af"
+		},
+		{
 			"ImportPath": "github.com/stellar/go/strkey",
+			"Comment": "horizon-v0.18.0-18-gb73b500",
+			"Rev": "b73b500bf3cba98c2b3c657ca37493f3a4fa51af"
+		},
+		{
+			"ImportPath": "github.com/stellar/go/support/app",
 			"Comment": "horizon-v0.18.0-18-gb73b500",
 			"Rev": "b73b500bf3cba98c2b3c657ca37493f3a4fa51af"
 		},
@@ -63,9 +140,54 @@
 			"Rev": "b73b500bf3cba98c2b3c657ca37493f3a4fa51af"
 		},
 		{
+			"ImportPath": "github.com/stellar/go/support/http/mutil",
+			"Comment": "horizon-v0.18.0-18-gb73b500",
+			"Rev": "b73b500bf3cba98c2b3c657ca37493f3a4fa51af"
+		},
+		{
+			"ImportPath": "github.com/stellar/go/support/log",
+			"Comment": "horizon-v0.18.0-18-gb73b500",
+			"Rev": "b73b500bf3cba98c2b3c657ca37493f3a4fa51af"
+		},
+		{
+			"ImportPath": "github.com/stellar/go/support/render/hal",
+			"Comment": "horizon-v0.18.0-18-gb73b500",
+			"Rev": "b73b500bf3cba98c2b3c657ca37493f3a4fa51af"
+		},
+		{
+			"ImportPath": "github.com/stellar/go/support/render/httpjson",
+			"Comment": "horizon-v0.18.0-18-gb73b500",
+			"Rev": "b73b500bf3cba98c2b3c657ca37493f3a4fa51af"
+		},
+		{
+			"ImportPath": "github.com/stellar/go/support/render/problem",
+			"Comment": "horizon-v0.18.0-18-gb73b500",
+			"Rev": "b73b500bf3cba98c2b3c657ca37493f3a4fa51af"
+		},
+		{
+			"ImportPath": "github.com/stellar/go/support/url",
+			"Comment": "horizon-v0.18.0-18-gb73b500",
+			"Rev": "b73b500bf3cba98c2b3c657ca37493f3a4fa51af"
+		},
+		{
 			"ImportPath": "github.com/stellar/go/xdr",
 			"Comment": "horizon-v0.18.0-18-gb73b500",
 			"Rev": "b73b500bf3cba98c2b3c657ca37493f3a4fa51af"
+		},
+		{
+			"ImportPath": "github.com/stretchr/objx",
+			"Comment": "v0.2.0-3-g35313a9",
+			"Rev": "35313a95ee26395aa17d366c71a2ccf788fa69b6"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/assert",
+			"Comment": "v1.3.0-12-g34c6fa2",
+			"Rev": "34c6fa2dc70986bccbbffcc6130f6920a924b075"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/mock",
+			"Comment": "v1.3.0-12-g34c6fa2",
+			"Rev": "34c6fa2dc70986bccbbffcc6130f6920a924b075"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/ed25519",
@@ -74,6 +196,10 @@
 		{
 			"ImportPath": "golang.org/x/crypto/ed25519/internal/edwards25519",
 			"Rev": "5c40567a22f818bd14a1ea7245dad9f8ef0691aa"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "b47fdc937951267e2d980171881317deea47f29b"
 		}
 	]
 }
