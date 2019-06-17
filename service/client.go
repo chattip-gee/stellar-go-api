@@ -67,6 +67,13 @@ func getFriendbot(w http.ResponseWriter, r *http.Request) {
 	defer friendBotResp.Body.Close()
 }
 
+type BalanceResponse struct {
+	Success    bool
+	Message    string
+	StatusCode int
+	Data       *[]horizon.Balance
+}
+
 func getAccountDetails(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	account, err := horizon.DefaultTestNetClient.LoadAccount(vars["addr"])
