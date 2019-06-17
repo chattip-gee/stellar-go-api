@@ -68,11 +68,6 @@
 			"Rev": "b73b500bf3cba98c2b3c657ca37493f3a4fa51af"
 		},
 		{
-			"ImportPath": "github.com/stellar/go/clients/horizon",
-			"Comment": "horizon-v0.18.0-18-gb73b500",
-			"Rev": "b73b500bf3cba98c2b3c657ca37493f3a4fa51af"
-		},
-		{
 			"ImportPath": "golang.org/x/crypto/ed25519",
 			"Rev": "5c40567a22f818bd14a1ea7245dad9f8ef0691aa"
 		},
