@@ -27,7 +27,8 @@ func HandleRequest() {
 	s := r.PathPrefix("/api").Subrouter()
 	s.HandleFunc("/keypair", getKeyPair).Methods("GET")
 	s.HandleFunc("/friendbot/{addr}", getFriendbot).Methods("GET")
-	s.HandleFunc("/account/details/{addr}", getAccountDetails).Methods("GET")
+	s.HandleFunc("/account/balances/{addr}", getBalances).Methods("GET")
+	s.HandleFunc("/transaction/payment", postTransaction).Methods("POST")
 
 	err := r.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		pathTemplate, err := route.GetPathTemplate()
