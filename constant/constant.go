@@ -10,6 +10,11 @@ const (
 	POST = "POST"
 )
 
+const (
+	SUCCESS = "Success"
+	FAILED  = "Failed"
+)
+
 const INFO_NO_PORT_IN_HEROKU = "No Port In Heroku "
 const INFO_ROUTE = "ROUTE:"
 const INFO_PATH_REGEXP = "Path regexp:"

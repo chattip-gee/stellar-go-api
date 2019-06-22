@@ -34,7 +34,7 @@ func getKeyPair(w http.ResponseWriter, r *http.Request) {
 	data := KeyPairItem{Address: pair.Address(), Seed: pair.Seed()}
 	response := KeyPairResponse{
 		Success:    true,
-		Message:    Success,
+		Message:    SUCCESS,
 		StatusCode: StatusOK,
 		Data:       &data,
 	}
@@ -52,13 +52,9 @@ func getFriendbot(w http.ResponseWriter, r *http.Request) {
 		}
 		JSONEncode(w, errResponse)
 	} else {
-		var message = Status{
-			Code:   friendBotResp.StatusCode,
-			Detail: friendBotResp.Status,
-		}
 		response := Response{
 			Success:    friendBotResp.StatusCode == StatusOK,
-			Message:    GetMessage(&message),
+			Message:    friendBotResp.Status,
 			StatusCode: friendBotResp.StatusCode,
 		}
 		JSONEncode(w, response)
@@ -81,7 +77,7 @@ func getBalances(w http.ResponseWriter, r *http.Request) {
 		balancesItem := BalanceItem{Balances: &account.Balances}
 		response := BalanceResponse{
 			Success:    true,
-			Message:    Success,
+			Message:    SUCCESS,
 			StatusCode: StatusOK,
 			Data:       &balancesItem,
 		}
@@ -187,7 +183,7 @@ func postTransaction(w http.ResponseWriter, r *http.Request) {
 
 		response := TransactionResponse{
 			Success:    true,
-			Message:    Success,
+			Message:    SUCCESS,
 			StatusCode: StatusOK,
 			Data:       &resp,
 		}
