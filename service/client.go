@@ -179,12 +179,12 @@ func postTransaction(w http.ResponseWriter, r *http.Request) {
 		resp, errSubmit := HorizonDefaultClient.SubmitTransaction(txeB64)
 		if errSubmit != nil {
 			fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[SUBMIT - ERROR]: "+errSubmit.Error())
-			aaa := Response{
+			errResponse := Response{
 				Success:    false,
 				Message:    errSubmit.Error(),
 				StatusCode: StatusBadRequest,
 			}
-			JSONEncode(w, aaa)
+			JSONEncode(w, errResponse)
 
 			return
 		}
