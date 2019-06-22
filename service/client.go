@@ -5,12 +5,12 @@ import (
 	"log"
 	"net/http"
 
+	. "github.com/chattip-gee/stellar-go-api/constant"
 	. "github.com/chattip-gee/stellar-go-api/http"
 	. "github.com/chattip-gee/stellar-go-api/model"
 	"github.com/gorilla/mux"
 
 	"github.com/stellar/go/build"
-	"github.com/stellar/go/clients/horizon"
 	"github.com/stellar/go/keypair"
 )
 
@@ -42,7 +42,7 @@ func getKeyPair(w http.ResponseWriter, r *http.Request) {
 
 func getFriendbot(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	friendBotResp, err := http.Get("https://horizon-testnet.stellar.org/friendbot?addr=" + vars["addr"])
+	friendBotResp, err := http.Get(HORIZON_FRIENDBOT_URL + vars[ADDR])
 	if err != nil {
 		log.Fatal(err)
 		errResponse := Response{
@@ -71,7 +71,7 @@ func getFriendbot(w http.ResponseWriter, r *http.Request) {
 
 func getBalances(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	account, err := horizon.DefaultTestNetClient.LoadAccount(vars["addr"])
+	account, err := HorizonDefaultClient.LoadAccount(vars[ADDR])
 	if err != nil {
 		log.Fatal(err)
 		errResponse := Response{
@@ -120,14 +120,14 @@ func postTransaction(w http.ResponseWriter, r *http.Request) {
 	baseFee := payment.Basefee
 
 	// Make sure destination account exists
-	if _, err := horizon.DefaultTestNetClient.LoadAccount(destination); err != nil {
+	if _, err := HorizonDefaultClient.LoadAccount(destination); err != nil {
 		panic(err)
 	}
 
 	tx, err := build.Transaction(
-		build.TestNetwork,
+		BuildNetwork,
 		build.SourceAccount{AddressOrSeed: source},
-		build.AutoSequence{SequenceProvider: horizon.DefaultTestNetClient},
+		build.AutoSequence{SequenceProvider: HorizonDefaultClient},
 		build.MemoText{Value: memo},
 		build.BaseFee{Amount: baseFee},
 		build.Payment(
@@ -140,7 +140,6 @@ func postTransaction(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	// Sign the transaction to prove you are actually the person sending it.
 	txe, err := tx.Sign(source)
 	if err != nil {
 		panic(err)
@@ -151,8 +150,7 @@ func postTransaction(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	// And finally, send it off to Stellar!
-	resp, err := horizon.DefaultTestNetClient.SubmitTransaction(txeB64)
+	resp, err := HorizonDefaultClient.SubmitTransaction(txeB64)
 	if err != nil {
 		panic(err)
 	}
