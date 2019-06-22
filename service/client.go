@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"html"
-	"log"
 	"net/http"
 
 	. "github.com/chattip-gee/stellar-go-api/constant"
@@ -20,7 +19,7 @@ func getKeyPair(w http.ResponseWriter, r *http.Request) {
 	pair, err := keypair.Random()
 
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[ERROR]: "+err.Error())
 
 		errResponse := Response{
 			Success:    false,
@@ -44,31 +43,28 @@ func getKeyPair(w http.ResponseWriter, r *http.Request) {
 
 func getFriendbot(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	friendBotResp, err := http.Get(HORIZON_FRIENDBOT_URL + vars[ADDR])
-	if err != nil {
-		log.Fatal(err)
+	if friendBotResp, err := http.Get(HORIZON_FRIENDBOT_URL + vars[ADDR]); err != nil {
+		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[ERROR]: "+err.Error())
 		errResponse := Response{
 			Success:    false,
 			Message:    err.Error(),
 			StatusCode: StatusBadRequest,
 		}
 		JSONEncode(w, errResponse)
+	} else {
+		var message = Status{
+			Code:   friendBotResp.StatusCode,
+			Detail: friendBotResp.Status,
+		}
+		response := Response{
+			Success:    friendBotResp.StatusCode == StatusOK,
+			Message:    GetMessage(&message),
+			StatusCode: friendBotResp.StatusCode,
+		}
+		JSONEncode(w, response)
 
-		return
+		defer friendBotResp.Body.Close()
 	}
-
-	var message = Status{
-		Code:   friendBotResp.StatusCode,
-		Detail: friendBotResp.Status,
-	}
-	response := Response{
-		Success:    friendBotResp.StatusCode == StatusOK,
-		Message:    GetMessage(&message),
-		StatusCode: friendBotResp.StatusCode,
-	}
-	JSONEncode(w, response)
-
-	defer friendBotResp.Body.Close()
 }
 
 func getBalances(w http.ResponseWriter, r *http.Request) {
