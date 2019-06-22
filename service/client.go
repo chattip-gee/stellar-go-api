@@ -52,9 +52,13 @@ func getFriendbot(w http.ResponseWriter, r *http.Request) {
 		}
 		JSONEncode(w, errResponse)
 	} else {
+		var message = Status{
+			Code:   friendBotResp.StatusCode,
+			Detail: friendBotResp.Status,
+		}
 		response := Response{
 			Success:    friendBotResp.StatusCode == StatusOK,
-			Message:    friendBotResp.Status,
+			Message:    GetMessage(&message),
 			StatusCode: friendBotResp.StatusCode,
 		}
 		JSONEncode(w, response)
