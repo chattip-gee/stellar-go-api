@@ -2,6 +2,8 @@ package service
 
 import (
 	"encoding/json"
+	"fmt"
+	"html"
 	"log"
 	"net/http"
 
@@ -71,41 +73,36 @@ func getFriendbot(w http.ResponseWriter, r *http.Request) {
 
 func getBalances(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	account, err := HorizonDefaultClient.LoadAccount(vars[ADDR])
-	if err != nil {
-		log.Fatal(err)
+	if account, err := HorizonDefaultClient.LoadAccount(vars[ADDR]); err != nil {
+		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[ERROR]: "+err.Error())
 		errResponse := Response{
 			Success:    false,
 			Message:    err.Error(),
-			StatusCode: StatusBadRequest,
+			StatusCode: StatusForbidden,
 		}
 		JSONEncode(w, errResponse)
-
-		return
+	} else {
+		balancesItem := BalanceItem{Balances: &account.Balances}
+		response := BalanceResponse{
+			Success:    true,
+			Message:    Success,
+			StatusCode: StatusOK,
+			Data:       &balancesItem,
+		}
+		JSONEncode(w, response)
 	}
-
-	balancesItem := BalanceItem{Balances: &account.Balances}
-
-	response := BalanceResponse{
-		Success:    true,
-		Message:    Success,
-		StatusCode: StatusOK,
-		Data:       &balancesItem,
-	}
-	JSONEncode(w, response)
 }
 
 func postTransaction(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-
 	var payment PaymentForm
-	err := decoder.Decode(&payment)
+	errDecode := decoder.Decode(&payment)
 
-	if err != nil {
-		log.Fatal(err)
+	if errDecode != nil {
+		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[DECODE - ERROR]: "+errDecode.Error())
 		errResponse := Response{
 			Success:    false,
-			Message:    err.Error(),
+			Message:    errDecode.Error(),
 			StatusCode: StatusBadRequest,
 		}
 		JSONEncode(w, errResponse)
@@ -119,47 +116,86 @@ func postTransaction(w http.ResponseWriter, r *http.Request) {
 	memo := payment.Memo
 	baseFee := payment.Basefee
 
-	// Make sure destination account exists
-	if _, err := HorizonDefaultClient.LoadAccount(destination); err != nil {
-		panic(err)
+	if _, errAccount := HorizonDefaultClient.LoadAccount(destination); errAccount != nil {
+		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[ACCOUNT - ERROR]: "+errAccount.Error())
+		accountError := Response{
+			Success:    false,
+			Message:    errAccount.Error(),
+			StatusCode: StatusForbidden,
+		}
+		JSONEncode(w, accountError)
+
+	} else {
+		tx, errTransaction := build.Transaction(
+			BuildNetwork,
+			build.SourceAccount{AddressOrSeed: source},
+			build.AutoSequence{SequenceProvider: HorizonDefaultClient},
+			build.MemoText{Value: memo},
+			build.BaseFee{Amount: baseFee},
+			build.Payment(
+				build.Destination{AddressOrSeed: destination},
+				build.NativeAmount{Amount: amount},
+			),
+		)
+
+		if errTransaction != nil {
+			fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[TRANSACTION - ERROR]: "+errTransaction.Error())
+			errResponse := Response{
+				Success:    false,
+				Message:    errTransaction.Error(),
+				StatusCode: StatusBadRequest,
+			}
+			JSONEncode(w, errResponse)
+
+			return
+		}
+
+		txe, errSign := tx.Sign(source)
+		if errSign != nil {
+			fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[SIGN - ERROR]: "+errSign.Error())
+			errResponse := Response{
+				Success:    false,
+				Message:    errSign.Error(),
+				StatusCode: StatusBadRequest,
+			}
+			JSONEncode(w, errResponse)
+
+			return
+		}
+
+		txeB64, errBase64 := txe.Base64()
+		if errBase64 != nil {
+			fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[BASE64 - ERROR]: "+errBase64.Error())
+			errResponse := Response{
+				Success:    false,
+				Message:    errBase64.Error(),
+				StatusCode: StatusBadRequest,
+			}
+			JSONEncode(w, errResponse)
+
+			return
+		}
+
+		resp, errSubmit := HorizonDefaultClient.SubmitTransaction(txeB64)
+		if errSubmit != nil {
+			fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[SUBMIT - ERROR]: "+errSubmit.Error())
+			aaa := Response{
+				Success:    false,
+				Message:    errSubmit.Error(),
+				StatusCode: StatusBadRequest,
+			}
+			JSONEncode(w, aaa)
+
+			return
+		}
+
+		response := TransactionResponse{
+			Success:    true,
+			Message:    Success,
+			StatusCode: StatusOK,
+			Data:       &resp,
+		}
+		JSONEncode(w, response)
 	}
 
-	tx, err := build.Transaction(
-		BuildNetwork,
-		build.SourceAccount{AddressOrSeed: source},
-		build.AutoSequence{SequenceProvider: HorizonDefaultClient},
-		build.MemoText{Value: memo},
-		build.BaseFee{Amount: baseFee},
-		build.Payment(
-			build.Destination{AddressOrSeed: destination},
-			build.NativeAmount{Amount: amount},
-		),
-	)
-
-	if err != nil {
-		panic(err)
-	}
-
-	txe, err := tx.Sign(source)
-	if err != nil {
-		panic(err)
-	}
-
-	txeB64, err := txe.Base64()
-	if err != nil {
-		panic(err)
-	}
-
-	resp, err := HorizonDefaultClient.SubmitTransaction(txeB64)
-	if err != nil {
-		panic(err)
-	}
-
-	response := TransactionResponse{
-		Success:    true,
-		Message:    Success,
-		StatusCode: StatusOK,
-		Data:       &resp,
-	}
-	JSONEncode(w, response)
 }
