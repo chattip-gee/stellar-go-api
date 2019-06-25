@@ -21,3 +21,5 @@ const INFO_PATH_REGEXP = "Path regexp:"
 const INFO_QURIES_TEMPLATES = "Queries templates:"
 const INFO_QURIES_REGEXPS = "Queries regexps:"
 const INFO_METHODS = "Methods:"
+
+const NATIVE = "native"

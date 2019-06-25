@@ -28,6 +28,7 @@ func HandleRequest() {
 	s.HandleFunc(KEYPAIR_PATH, getKeyPair).Methods(GET)
 	s.HandleFunc(FIRENDBOT_PATH, getFriendbot).Methods(GET)
 	s.HandleFunc(ACCOUNT_BALANCES_PATH, getBalances).Methods(GET)
+	s.HandleFunc(ACCOUNT_ADD_ASSET_PATH, postAddAsset).Methods(POST)
 	s.HandleFunc(TRANSACTION_PAYMENT_PATH, postTransaction).Methods(POST)
 
 	err := r.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {

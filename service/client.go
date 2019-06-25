@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/stellar/go/build"
+	"github.com/stellar/go/clients/horizon"
 	"github.com/stellar/go/keypair"
 )
 
@@ -109,6 +110,7 @@ func postTransaction(w http.ResponseWriter, r *http.Request) {
 	source := payment.Source
 	destination := payment.Destination
 	amount := payment.Amount
+	code := payment.Code
 	memo := payment.Memo
 	baseFee := payment.Basefee
 
@@ -130,7 +132,7 @@ func postTransaction(w http.ResponseWriter, r *http.Request) {
 			build.BaseFee{Amount: baseFee},
 			build.Payment(
 				build.Destination{AddressOrSeed: destination},
-				build.NativeAmount{Amount: amount},
+				build.CreditAmount{Code: code, Issuer: source, Amount: amount},
 			),
 		)
 
@@ -194,4 +196,104 @@ func postTransaction(w http.ResponseWriter, r *http.Request) {
 		JSONEncode(w, response)
 	}
 
+}
+
+func postAddAsset(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var assetInfo AssetForm
+	errDecode := decoder.Decode(&assetInfo)
+
+	if errDecode != nil {
+		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[DECODE - ERROR]: "+errDecode.Error())
+		errResponse := Response{
+			Success:    false,
+			Message:    errDecode.Error(),
+			StatusCode: StatusBadRequest,
+		}
+		JSONEncode(w, errResponse)
+
+		return
+	}
+
+	issuerAddress := assetInfo.IssuerAddress
+	recipientSeed := assetInfo.RecipientSeed
+	code := assetInfo.Code
+	limit := assetInfo.Limit
+
+	recipient, errKeyParse := keypair.Parse(recipientSeed)
+	if errKeyParse != nil {
+		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[KEY_PARSE - ERROR]: "+errKeyParse.Error())
+		errResponse := Response{
+			Success:    false,
+			Message:    errKeyParse.Error(),
+			StatusCode: StatusBadRequest,
+		}
+		JSONEncode(w, errResponse)
+
+		return
+	}
+
+	assetName := build.CreditAsset(code, issuerAddress)
+
+	trustTx, errBuildTransaction := build.Transaction(
+		build.SourceAccount{AddressOrSeed: recipient.Address()},
+		build.AutoSequence{SequenceProvider: horizon.DefaultTestNetClient},
+		build.TestNetwork,
+		build.Trust(assetName.Code, assetName.Issuer, build.Limit(limit)),
+	)
+	if errBuildTransaction != nil {
+		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[BUILD_TRANSACTION - ERROR]: "+errBuildTransaction.Error())
+		errResponse := Response{
+			Success:    false,
+			Message:    errBuildTransaction.Error(),
+			StatusCode: StatusBadRequest,
+		}
+		JSONEncode(w, errResponse)
+
+		return
+	}
+	trustTxe, errSign := trustTx.Sign(recipientSeed)
+	if errSign != nil {
+		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[SIGN - ERROR]: "+errSign.Error())
+		errResponse := Response{
+			Success:    false,
+			Message:    errSign.Error(),
+			StatusCode: StatusBadRequest,
+		}
+		JSONEncode(w, errResponse)
+
+		return
+	}
+	trustTxeB64, errTrustTxeB64 := trustTxe.Base64()
+	if errTrustTxeB64 != nil {
+		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[TRUST_TXE_BASE64 - ERROR]: "+errTrustTxeB64.Error())
+		errResponse := Response{
+			Success:    false,
+			Message:    errTrustTxeB64.Error(),
+			StatusCode: StatusBadRequest,
+		}
+		JSONEncode(w, errResponse)
+
+		return
+	}
+	submitResponse, errSubmit := horizon.DefaultTestNetClient.SubmitTransaction(trustTxeB64)
+	if errSubmit != nil {
+		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[SUBMIT_TRANSACTION - ERROR]: "+errSubmit.Error())
+		errResponse := Response{
+			Success:    false,
+			Message:    errSubmit.Error(),
+			StatusCode: StatusBadRequest,
+		}
+		JSONEncode(w, errResponse)
+
+		return
+	}
+
+	response := TransactionResponse{
+		Success:    true,
+		Message:    SUCCESS,
+		StatusCode: StatusOK,
+		Data:       &submitResponse,
+	}
+	JSONEncode(w, response)
 }
