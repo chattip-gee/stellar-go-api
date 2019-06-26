@@ -124,16 +124,24 @@ func postTransaction(w http.ResponseWriter, r *http.Request) {
 		JSONEncode(w, accountError)
 
 	} else {
+		defaultPayment := build.Payment(
+			build.Destination{AddressOrSeed: destination},
+			build.NativeAmount{Amount: amount},
+		)
+		if code != NATIVE {
+			defaultPayment = build.Payment(
+				build.Destination{AddressOrSeed: destination},
+				build.CreditAmount{Code: code, Issuer: source, Amount: amount},
+			)
+		}
+
 		tx, errTransaction := build.Transaction(
 			BuildNetwork,
 			build.SourceAccount{AddressOrSeed: source},
 			build.AutoSequence{SequenceProvider: HorizonDefaultClient},
 			build.MemoText{Value: memo},
 			build.BaseFee{Amount: baseFee},
-			build.Payment(
-				build.Destination{AddressOrSeed: destination},
-				build.CreditAmount{Code: code, Issuer: source, Amount: amount},
-			),
+			defaultPayment,
 		)
 
 		if errTransaction != nil {
