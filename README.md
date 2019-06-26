@@ -1,5 +1,6 @@
 # stellar-go-api
-# Support Restful API
+[Support Restful API]
+
 - API Keypair
 - API friendbot
 - API Balances
