@@ -1,5 +1,11 @@
 package http
 
+import (
+	"fmt"
+	"html"
+	"net/http"
+)
+
 //Horizon
 const HORIZON_FRIENDBOT_URL = "https://horizon-testnet.stellar.org/friendbot?addr="
 
@@ -12,3 +18,7 @@ const FIRENDBOT_PATH = "/friendbot/{addr}"
 const ACCOUNT_BALANCES_PATH = "/account/balances/{addr}"
 const ACCOUNT_ADD_ASSET_PATH = "/account/addasset"
 const TRANSACTION_PAYMENT_PATH = "/transaction/payment"
+
+func PrintApiPath(r *http.Request) {
+	fmt.Printf("%q \n", "[API URL]: "+html.EscapeString(r.URL.Path))
+}

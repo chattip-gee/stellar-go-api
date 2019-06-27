@@ -3,7 +3,6 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	"html"
 	"net/http"
 
 	. "github.com/chattip-gee/stellar-go-api/constant"
@@ -17,18 +16,12 @@ import (
 )
 
 func getKeyPair(w http.ResponseWriter, r *http.Request) {
+	PrintApiPath(r)
+
 	pair, err := keypair.Random()
 
 	if err != nil {
-		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[ERROR]: "+err.Error())
-
-		errResponse := Response{
-			Success:    false,
-			Message:    err.Error(),
-			StatusCode: StatusInternalServerError,
-		}
-		JSONEncode(w, errResponse)
-
+		JSONError(w, err.Error(), StatusInternalServerError)
 		return
 	}
 
@@ -40,18 +33,15 @@ func getKeyPair(w http.ResponseWriter, r *http.Request) {
 		Data:       &data,
 	}
 	JSONEncode(w, response)
+
 }
 
 func getFriendbot(w http.ResponseWriter, r *http.Request) {
+	PrintApiPath(r)
+
 	vars := mux.Vars(r)
 	if friendBotResp, err := http.Get(HORIZON_FRIENDBOT_URL + vars[ADDR]); err != nil {
-		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[ERROR]: "+err.Error())
-		errResponse := Response{
-			Success:    false,
-			Message:    err.Error(),
-			StatusCode: StatusBadRequest,
-		}
-		JSONEncode(w, errResponse)
+		JSONError(w, err.Error(), StatusBadRequest)
 	} else {
 		var message = Status{
 			Code:   friendBotResp.StatusCode,
@@ -66,18 +56,15 @@ func getFriendbot(w http.ResponseWriter, r *http.Request) {
 
 		defer friendBotResp.Body.Close()
 	}
+
 }
 
 func getBalances(w http.ResponseWriter, r *http.Request) {
+	PrintApiPath(r)
+
 	vars := mux.Vars(r)
 	if account, err := HorizonDefaultClient.LoadAccount(vars[ADDR]); err != nil {
-		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[ERROR]: "+err.Error())
-		errResponse := Response{
-			Success:    false,
-			Message:    err.Error(),
-			StatusCode: StatusForbidden,
-		}
-		JSONEncode(w, errResponse)
+		JSONError(w, err.Error(), StatusForbidden)
 	} else {
 		balancesItem := BalanceItem{Balances: &account.Balances}
 		response := BalanceResponse{
@@ -88,22 +75,19 @@ func getBalances(w http.ResponseWriter, r *http.Request) {
 		}
 		JSONEncode(w, response)
 	}
+
 }
 
 func postTransaction(w http.ResponseWriter, r *http.Request) {
+	PrintApiPath(r)
+
 	decoder := json.NewDecoder(r.Body)
 	var payment PaymentForm
 	errDecode := decoder.Decode(&payment)
 
 	if errDecode != nil {
-		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[DECODE - ERROR]: "+errDecode.Error())
-		errResponse := Response{
-			Success:    false,
-			Message:    errDecode.Error(),
-			StatusCode: StatusBadRequest,
-		}
-		JSONEncode(w, errResponse)
-
+		fmt.Print("[DECODE - ERROR]\n")
+		JSONError(w, errDecode.Error(), StatusBadRequest)
 		return
 	}
 
@@ -115,14 +99,8 @@ func postTransaction(w http.ResponseWriter, r *http.Request) {
 	baseFee := payment.Basefee
 
 	if _, errAccount := HorizonDefaultClient.LoadAccount(destination); errAccount != nil {
-		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[ACCOUNT - ERROR]: "+errAccount.Error())
-		accountError := Response{
-			Success:    false,
-			Message:    errAccount.Error(),
-			StatusCode: StatusForbidden,
-		}
-		JSONEncode(w, accountError)
-
+		fmt.Print("[ACCOUNT - ERROR]\n")
+		JSONError(w, errAccount.Error(), StatusForbidden)
 	} else {
 		defaultPayment := build.Payment(
 			build.Destination{AddressOrSeed: destination},
@@ -145,53 +123,29 @@ func postTransaction(w http.ResponseWriter, r *http.Request) {
 		)
 
 		if errTransaction != nil {
-			fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[TRANSACTION - ERROR]: "+errTransaction.Error())
-			errResponse := Response{
-				Success:    false,
-				Message:    errTransaction.Error(),
-				StatusCode: StatusBadRequest,
-			}
-			JSONEncode(w, errResponse)
-
+			fmt.Print("[TRANSACTION - ERROR]\n")
+			JSONError(w, errTransaction.Error(), StatusBadRequest)
 			return
 		}
 
 		txe, errSign := tx.Sign(source)
 		if errSign != nil {
-			fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[SIGN - ERROR]: "+errSign.Error())
-			errResponse := Response{
-				Success:    false,
-				Message:    errSign.Error(),
-				StatusCode: StatusBadRequest,
-			}
-			JSONEncode(w, errResponse)
-
+			fmt.Print("[SIGN - ERROR]\n")
+			JSONError(w, errSign.Error(), StatusBadRequest)
 			return
 		}
 
 		txeB64, errBase64 := txe.Base64()
 		if errBase64 != nil {
-			fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[BASE64 - ERROR]: "+errBase64.Error())
-			errResponse := Response{
-				Success:    false,
-				Message:    errBase64.Error(),
-				StatusCode: StatusBadRequest,
-			}
-			JSONEncode(w, errResponse)
-
+			fmt.Print("[BASE64 - ERROR]\n")
+			JSONError(w, errBase64.Error(), StatusBadRequest)
 			return
 		}
 
 		resp, errSubmit := HorizonDefaultClient.SubmitTransaction(txeB64)
 		if errSubmit != nil {
-			fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[SUBMIT - ERROR]: "+errSubmit.Error())
-			errResponse := Response{
-				Success:    false,
-				Message:    errSubmit.Error(),
-				StatusCode: StatusBadRequest,
-			}
-			JSONEncode(w, errResponse)
-
+			fmt.Print("[SUBMIT - ERROR]\n")
+			JSONError(w, errSubmit.Error(), StatusBadRequest)
 			return
 		}
 
@@ -207,19 +161,15 @@ func postTransaction(w http.ResponseWriter, r *http.Request) {
 }
 
 func postAddAsset(w http.ResponseWriter, r *http.Request) {
+	PrintApiPath(r)
+
 	decoder := json.NewDecoder(r.Body)
 	var assetInfo AssetForm
 	errDecode := decoder.Decode(&assetInfo)
 
 	if errDecode != nil {
-		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[DECODE - ERROR]: "+errDecode.Error())
-		errResponse := Response{
-			Success:    false,
-			Message:    errDecode.Error(),
-			StatusCode: StatusBadRequest,
-		}
-		JSONEncode(w, errResponse)
-
+		fmt.Print("[DECODE - ERROR]\n")
+		JSONError(w, errDecode.Error(), StatusBadRequest)
 		return
 	}
 
@@ -230,14 +180,8 @@ func postAddAsset(w http.ResponseWriter, r *http.Request) {
 
 	recipient, errKeyParse := keypair.Parse(recipientSeed)
 	if errKeyParse != nil {
-		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[KEY_PARSE - ERROR]: "+errKeyParse.Error())
-		errResponse := Response{
-			Success:    false,
-			Message:    errKeyParse.Error(),
-			StatusCode: StatusBadRequest,
-		}
-		JSONEncode(w, errResponse)
-
+		fmt.Print("[KEY_PARSE - ERROR]\n")
+		JSONError(w, errKeyParse.Error(), StatusBadRequest)
 		return
 	}
 
@@ -250,50 +194,29 @@ func postAddAsset(w http.ResponseWriter, r *http.Request) {
 		build.Trust(assetName.Code, assetName.Issuer, build.Limit(limit)),
 	)
 	if errBuildTransaction != nil {
-		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[BUILD_TRANSACTION - ERROR]: "+errBuildTransaction.Error())
-		errResponse := Response{
-			Success:    false,
-			Message:    errBuildTransaction.Error(),
-			StatusCode: StatusBadRequest,
-		}
-		JSONEncode(w, errResponse)
-
+		fmt.Print("[BUILD_TRANSACTION - ERROR]\n")
+		JSONError(w, errBuildTransaction.Error(), StatusBadRequest)
 		return
 	}
+
 	trustTxe, errSign := trustTx.Sign(recipientSeed)
 	if errSign != nil {
-		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[SIGN - ERROR]: "+errSign.Error())
-		errResponse := Response{
-			Success:    false,
-			Message:    errSign.Error(),
-			StatusCode: StatusBadRequest,
-		}
-		JSONEncode(w, errResponse)
-
+		fmt.Print("[SIGN - ERROR]\n")
+		JSONError(w, errSign.Error(), StatusBadRequest)
 		return
 	}
+
 	trustTxeB64, errTrustTxeB64 := trustTxe.Base64()
 	if errTrustTxeB64 != nil {
-		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[TRUST_TXE_BASE64 - ERROR]: "+errTrustTxeB64.Error())
-		errResponse := Response{
-			Success:    false,
-			Message:    errTrustTxeB64.Error(),
-			StatusCode: StatusBadRequest,
-		}
-		JSONEncode(w, errResponse)
-
+		fmt.Print("[TRUST_TXE_BASE64 - ERROR]\n")
+		JSONError(w, errTrustTxeB64.Error(), StatusBadRequest)
 		return
 	}
+
 	submitResponse, errSubmit := horizon.DefaultTestNetClient.SubmitTransaction(trustTxeB64)
 	if errSubmit != nil {
-		fmt.Printf("%q \n %s \n", "[API URL]: "+html.EscapeString(r.URL.Path), "[SUBMIT_TRANSACTION - ERROR]: "+errSubmit.Error())
-		errResponse := Response{
-			Success:    false,
-			Message:    errSubmit.Error(),
-			StatusCode: StatusBadRequest,
-		}
-		JSONEncode(w, errResponse)
-
+		fmt.Print("[SUBMIT_TRANSACTION - ERROR]\n")
+		JSONError(w, errSubmit.Error(), StatusBadRequest)
 		return
 	}
 
@@ -304,4 +227,5 @@ func postAddAsset(w http.ResponseWriter, r *http.Request) {
 		Data:       &submitResponse,
 	}
 	JSONEncode(w, response)
+
 }
