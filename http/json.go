@@ -13,6 +13,16 @@ func JSONEncode(w http.ResponseWriter, v interface{}) {
 	json.NewEncoder(w).Encode(v)
 }
 
+func JSONDecode(url string, target interface{}) error {
+	r, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer r.Body.Close()
+
+	return json.NewDecoder(r.Body).Decode(target)
+}
+
 func JSONError(w http.ResponseWriter, message string, code int) {
 	response := Response{
 		Success:    false,

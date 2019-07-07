@@ -30,6 +30,7 @@ func HandleRequest() {
 	s.HandleFunc(ACCOUNT_BALANCES_PATH, getBalances).Methods(GET)
 	s.HandleFunc(ACCOUNT_ADD_ASSET_PATH, postAddAsset).Methods(POST)
 	s.HandleFunc(TRANSACTION_PAYMENT_PATH, postTransaction).Methods(POST)
+	s.HandleFunc(ACCOUNTS_PAYMENTS_PATH, getAccountsPayments).Methods(GET)
 
 	err := r.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		pathTemplate, err := route.GetPathTemplate()
