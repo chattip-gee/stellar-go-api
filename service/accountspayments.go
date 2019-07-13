@@ -17,7 +17,11 @@ func getAccountsPayments(w http.ResponseWriter, r *http.Request) {
 	if err := JSONDecode(HORIZON_RECEIVE_PAYMENTS_URL+vars[ADDR]+PAYMENTS_PART, accountsPayments); err != nil {
 		JSONResponse(w, false, err.Error(), StatusBadRequest, nil)
 	} else {
-		JSONResponse(w, true, SUCCESS, StatusOK, &accountsPayments)
+		if accountsPayments.Detail == "" {
+			JSONResponse(w, true, SUCCESS, StatusOK, &accountsPayments)
+		} else {
+			JSONResponse(w, false, FAILED, accountsPayments.Status, nil)
+		}
 	}
 
 }

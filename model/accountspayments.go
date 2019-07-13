@@ -1,7 +1,10 @@
 package model
 
 type AccountsPaymentsItem struct {
-	Embedded struct {
+	Title    string `json:"title,omitempty"`
+	Status   int    `json:"status,omitempty"`
+	Detail   string `json:"detail,omitempty"`
+	Embedded *struct {
 		Records []struct {
 			ID                    string `json:"id"`
 			PagingToken           string `json:"paging_token"`
@@ -19,5 +22,5 @@ type AccountsPaymentsItem struct {
 			To                    string `json:"to,omitempty"`
 			Amount                string `json:"amount,omitempty"`
 		} `json:"records"`
-	} `json:"_embedded"`
+	} `json:"_embedded,omitempty"`
 }
