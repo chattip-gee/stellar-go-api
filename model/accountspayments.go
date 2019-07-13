@@ -21,10 +21,3 @@ type AccountsPaymentsItem struct {
 		} `json:"records"`
 	} `json:"_embedded"`
 }
-
-type AccountsPaymentsResponse struct {
-	Success    bool                  `json:"success"`
-	Message    string                `json:"message"`
-	StatusCode int                   `json:"statusCode"`
-	Data       *AccountsPaymentsItem `json:"data"`
-}

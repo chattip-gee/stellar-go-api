@@ -23,7 +23,7 @@ func postAddAsset(w http.ResponseWriter, r *http.Request) {
 
 	if errDecode != nil {
 		fmt.Print("[DECODE - ERROR]\n")
-		JSONError(w, errDecode.Error(), StatusBadRequest)
+		JSONResponse(w, false, errDecode.Error(), StatusBadRequest, nil)
 		return
 	}
 
@@ -35,7 +35,7 @@ func postAddAsset(w http.ResponseWriter, r *http.Request) {
 	recipient, errKeyParse := keypair.Parse(recipientSeed)
 	if errKeyParse != nil {
 		fmt.Print("[KEY_PARSE - ERROR]\n")
-		JSONError(w, errKeyParse.Error(), StatusBadRequest)
+		JSONResponse(w, false, errKeyParse.Error(), StatusBadRequest, nil)
 		return
 	}
 
@@ -49,37 +49,31 @@ func postAddAsset(w http.ResponseWriter, r *http.Request) {
 	)
 	if errBuildTransaction != nil {
 		fmt.Print("[BUILD_TRANSACTION - ERROR]\n")
-		JSONError(w, errBuildTransaction.Error(), StatusBadRequest)
+		JSONResponse(w, false, errBuildTransaction.Error(), StatusBadRequest, nil)
 		return
 	}
 
 	trustTxe, errSign := trustTx.Sign(recipientSeed)
 	if errSign != nil {
 		fmt.Print("[SIGN - ERROR]\n")
-		JSONError(w, errSign.Error(), StatusBadRequest)
+		JSONResponse(w, false, errSign.Error(), StatusBadRequest, nil)
 		return
 	}
 
 	trustTxeB64, errTrustTxeB64 := trustTxe.Base64()
 	if errTrustTxeB64 != nil {
 		fmt.Print("[TRUST_TXE_BASE64 - ERROR]\n")
-		JSONError(w, errTrustTxeB64.Error(), StatusBadRequest)
+		JSONResponse(w, false, errTrustTxeB64.Error(), StatusBadRequest, nil)
 		return
 	}
 
 	submitResponse, errSubmit := horizon.DefaultTestNetClient.SubmitTransaction(trustTxeB64)
 	if errSubmit != nil {
 		fmt.Print("[SUBMIT_TRANSACTION - ERROR]\n")
-		JSONError(w, errSubmit.Error(), StatusBadRequest)
+		JSONResponse(w, false, errSubmit.Error(), StatusBadRequest, nil)
 		return
 	}
 
-	response := TransactionResponse{
-		Success:    true,
-		Message:    SUCCESS,
-		StatusCode: StatusOK,
-		Data:       &submitResponse,
-	}
-	JSONEncode(w, response)
+	JSONResponse(w, true, SUCCESS, StatusOK, &submitResponse)
 
 }

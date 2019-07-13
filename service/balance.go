@@ -14,16 +14,10 @@ func getBalances(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	if account, err := HorizonDefaultClient.LoadAccount(vars[ADDR]); err != nil {
-		JSONError(w, err.Error(), StatusForbidden)
+		JSONResponse(w, false, err.Error(), StatusForbidden, nil)
 	} else {
 		balancesItem := BalanceItem{Balances: &account.Balances}
-		response := BalanceResponse{
-			Success:    true,
-			Message:    SUCCESS,
-			StatusCode: StatusOK,
-			Data:       &balancesItem,
-		}
-		JSONEncode(w, response)
+		JSONResponse(w, true, SUCCESS, StatusOK, &balancesItem)
 	}
 
 }

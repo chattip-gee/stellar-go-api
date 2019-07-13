@@ -16,17 +16,11 @@ func getKeyPair(w http.ResponseWriter, r *http.Request) {
 	pair, err := keypair.Random()
 
 	if err != nil {
-		JSONError(w, err.Error(), StatusInternalServerError)
+		JSONResponse(w, false, err.Error(), StatusInternalServerError, nil)
 		return
 	}
 
 	data := KeyPairItem{Address: pair.Address(), Seed: pair.Seed()}
-	response := KeyPairResponse{
-		Success:    true,
-		Message:    SUCCESS,
-		StatusCode: StatusOK,
-		Data:       &data,
-	}
-	JSONEncode(w, response)
+	JSONResponse(w, true, SUCCESS, StatusOK, &data)
 
 }

@@ -21,7 +21,7 @@ func postTransaction(w http.ResponseWriter, r *http.Request) {
 
 	if errDecode != nil {
 		fmt.Print("[DECODE - ERROR]\n")
-		JSONError(w, errDecode.Error(), StatusBadRequest)
+		JSONResponse(w, false, errDecode.Error(), StatusBadRequest, nil)
 		return
 	}
 
@@ -34,7 +34,7 @@ func postTransaction(w http.ResponseWriter, r *http.Request) {
 
 	if _, errAccount := HorizonDefaultClient.LoadAccount(destination); errAccount != nil {
 		fmt.Print("[ACCOUNT - ERROR]\n")
-		JSONError(w, errAccount.Error(), StatusForbidden)
+		JSONResponse(w, false, errAccount.Error(), StatusForbidden, nil)
 	} else {
 		defaultPayment := build.Payment(
 			build.Destination{AddressOrSeed: destination},
@@ -58,38 +58,32 @@ func postTransaction(w http.ResponseWriter, r *http.Request) {
 
 		if errTransaction != nil {
 			fmt.Print("[TRANSACTION - ERROR]\n")
-			JSONError(w, errTransaction.Error(), StatusBadRequest)
+			JSONResponse(w, false, errTransaction.Error(), StatusBadRequest, nil)
 			return
 		}
 
 		txe, errSign := tx.Sign(source)
 		if errSign != nil {
 			fmt.Print("[SIGN - ERROR]\n")
-			JSONError(w, errSign.Error(), StatusBadRequest)
+			JSONResponse(w, false, errSign.Error(), StatusBadRequest, nil)
 			return
 		}
 
 		txeB64, errBase64 := txe.Base64()
 		if errBase64 != nil {
 			fmt.Print("[BASE64 - ERROR]\n")
-			JSONError(w, errBase64.Error(), StatusBadRequest)
+			JSONResponse(w, false, errBase64.Error(), StatusBadRequest, nil)
 			return
 		}
 
 		resp, errSubmit := HorizonDefaultClient.SubmitTransaction(txeB64)
 		if errSubmit != nil {
 			fmt.Print("[SUBMIT - ERROR]\n")
-			JSONError(w, errSubmit.Error(), StatusBadRequest)
+			JSONResponse(w, false, errSubmit.Error(), StatusBadRequest, nil)
 			return
 		}
 
-		response := TransactionResponse{
-			Success:    true,
-			Message:    SUCCESS,
-			StatusCode: StatusOK,
-			Data:       &resp,
-		}
-		JSONEncode(w, response)
+		JSONResponse(w, true, SUCCESS, StatusOK, &resp)
 	}
 
 }

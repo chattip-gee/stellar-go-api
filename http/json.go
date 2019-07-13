@@ -23,11 +23,12 @@ func JSONDecode(url string, target interface{}) error {
 	return json.NewDecoder(r.Body).Decode(target)
 }
 
-func JSONError(w http.ResponseWriter, message string, code int) {
+func JSONResponse(w http.ResponseWriter, isSuccess bool, message string, code int, data interface{}) {
 	response := Response{
-		Success:    false,
+		Success:    isSuccess,
 		Message:    message,
 		StatusCode: code,
+		Data:       &data,
 	}
 	JSONEncode(w, response)
 }

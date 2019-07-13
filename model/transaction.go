@@ -1,9 +1,5 @@
 package model
 
-import (
-	. "github.com/stellar/go/clients/horizon"
-)
-
 type PaymentForm struct {
 	Source      string `json:"source"`
 	Destination string `json:"destination"`
@@ -11,11 +7,4 @@ type PaymentForm struct {
 	Code        string `json:"code"`
 	Memo        string `json:"memo"`
 	Basefee     uint64 `json:"baseFee"`
-}
-
-type TransactionResponse struct {
-	Success    bool                `json:"success"`
-	Message    string              `json:"message"`
-	StatusCode int                 `json:"statusCode"`
-	Data       *TransactionSuccess `json:"data"`
 }

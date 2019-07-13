@@ -15,15 +15,9 @@ func getAccountsPayments(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	accountsPayments := new(AccountsPaymentsItem)
 	if err := JSONDecode(HORIZON_RECEIVE_PAYMENTS_URL+vars[ADDR]+PAYMENTS_PART, accountsPayments); err != nil {
-		JSONError(w, err.Error(), StatusBadRequest)
+		JSONResponse(w, false, err.Error(), StatusBadRequest, nil)
 	} else {
-		response := AccountsPaymentsResponse{
-			Success:    true,
-			Message:    SUCCESS,
-			StatusCode: StatusOK,
-			Data:       accountsPayments,
-		}
-		JSONEncode(w, response)
+		JSONResponse(w, true, SUCCESS, StatusOK, &accountsPayments)
 	}
 
 }
