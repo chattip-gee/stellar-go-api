@@ -2,7 +2,7 @@
 [Support Restful API]
 
 - API Keypair
-- API friendbot
+- API Friendbot
 - API Balances
 - API Payment
 - API Add Asset
