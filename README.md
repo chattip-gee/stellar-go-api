@@ -6,4 +6,4 @@
 - API Balances
 - API Payment
 - API Add Asset
-- API Account Payments
+- API Accounts Payments
